@@ -1,2 +1,0 @@
-# kurentoServer
-kurento Server
