@@ -56,9 +56,9 @@
                     
                     connect two cendpoints in same node : connectEndpointsSameNode( caller, callee, callback )
                     
-                    connect two cendpoints with different nodes : connectEndpointsDiffNode( caller, callee, callback )
-                    
-                    
+                    connect two cendpoints with different nodes : connectEndpointsDiffNode( callerSessionId, calleeSessionId, callback )
+                     
+#2016/2/1 complete several kurento functions except 'connectEndpointsDiffNode', need a deep thinking
                     
                     
                     

@@ -20,6 +20,7 @@ var minimist = require('minimist');
 var ws = require('ws');
 var fs = require('fs');
 var https = require('https');
+var UUID = require('uuid');
 var index = require('./index');
 
 var argv = minimist(process.argv.slice(2), {
@@ -67,12 +68,13 @@ function nextUniqueId() {
  */
 wss.on('connection', function (ws) {
 
-    var sessionId = nextUniqueId();
-    console.log('Connection received with sessionId ' + sessionId);
+    var sessionId = UUID.v4(),
+        aUser;
+    console.log('Connection come with sessionId ' + sessionId);
 
     ws.on('error', function (error) {
         console.log('Connection ' + sessionId + ' error');
-        index.stop(sessionId);
+        //index.stop(sessionId);
     });
 
     ws.on('close', function () {
@@ -82,85 +84,23 @@ wss.on('connection', function (ws) {
 
     ws.on('message', function (_message) {
         var message = JSON.parse(_message);
-        if (message.id.indexOf('Candidate') < 0) {
-            console.log('Connection ' + sessionId + ' received message ', message);
-        }
 
-        switch (message.id) {
-            case 'presenter':
-                index.startPresenter(sessionId, ws, message.option, function (error, sdpAnswer) {
-                    if (error) {
-                        return ws.send(JSON.stringify({
-                            id: 'presenterResponse',
-                            response: 'rejected',
-                            message: error
-                        }));
-                    }
-                    ws.send(JSON.stringify({
-                        id: 'presenterResponse',
-                        response: 'accepted',
-                        sdpAnswer: sdpAnswer
-                    }));
-                });
+        switch (message.id){
+            case 'aUserLogin':
+                var _option = message.option || {};
+                _option['sessionId'] = sessionId;
+                _option['ws'] = ws;
+                aUser = index.aUserLogin(_option);
                 break;
 
-            case 'viewer':
-                index.startViewer(sessionId, ws, message.option, function (error, callee, sdpAnswer) {
-                    if (error) {
-                        return ws.send(JSON.stringify({
-                            id: 'viewerResponse',
-                            response: 'rejected',
-                            message: error
-                        }));
-                    }
-
-                    ws.send(JSON.stringify({
-                        id: 'viewerResponse',
-                        response: 'accepted',
-                        who: callee,
-                        sdpAnswer: sdpAnswer
-                    }));
-                });
+            case 'eventCome':
+                if(aUser) aUser.emit(message.evName,message.option);
                 break;
 
-            case 'monitorLogin':
-                index.monitorLogin(sessionId, message.option, ws);
-                break;
-
-            case 'monitorOffer':
-                index.monitorOffer(sessionId, ws, message.callee, message.sdpOffer);
-                break;
-
-            case 'stop':
-                index.stop(sessionId);
-                break;
-
-            case 'onIceCandidate':
-                index.onIceCandidate(sessionId, message.candidate);
-                break;
-
-            case 'onViewIceCandidate':
-                index.OnViewIceCandidate(sessionId, message.callee, message.candidate);
-                break;
-
-            case 'onMonitorIceCandidate':
-                index.onMonitorCandidate(sessionId, message.callee, message.candidate);
-                break;
-
-            case 'destroyMonitor':
-                index.destroyMonitor(sessionId);
-                break;
-
-            case 'getPresnters':
-                index.getPresnters(sessionId, ws);
-                break;
             default:
-                ws.send(JSON.stringify({
-                    id: 'error',
-                    message: 'Invalid message ' + message
-                }));
                 break;
         }
+
     });
 });
 

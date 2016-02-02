@@ -39,6 +39,12 @@ function User(option) {
     // user's Kurento WebRtcEndpoint
     this.webrtcendpont = null;
 
+    //the guy present video 's rtpendpoint
+    this.callerrtpendpoint = null;
+
+    //this guy 's rtpendpoint
+    this.calleertpendpoint = null;
+
     // user's Kurento PipeLine
     this.pipeline = null;
 
@@ -53,9 +59,11 @@ function User(option) {
     switch (option.role){
         case 'teacher':
             thisClass['teacher'] = this;
+            if(thisClass['student']) this.view = thisClass['student'].sessionId;
             break;
         case 'student':
             thisClass['student'] = this;
+            if(thisClass['teacher']) this.view = thisClass['teacher'].sessionId;
             break;
         case 'monitor':
             thisClass['monitors']['monitor'][option.sessionId] = this;
@@ -68,6 +76,7 @@ function User(option) {
     }
 
 }
+
 
 function createClass(classid){
     Classes[classid] = {};

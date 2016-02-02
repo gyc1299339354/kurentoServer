@@ -1,7 +1,8 @@
 /**
  * Created by Administrator on 2016/1/29.
  */
-var User = require('../User');
+var User = require('../User'),
+    EventUtil = require('../EventUtil');
 
 /**
  * Student
@@ -28,5 +29,7 @@ function Student(option){
     User.call(this,option);
 
 }
+
+Student.prototype = new EventUtil();
 
 module.exports = Student;

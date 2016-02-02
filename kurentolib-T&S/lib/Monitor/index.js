@@ -1,7 +1,8 @@
 /**
  * Created by Administrator on 2016/1/29.
  */
-var User = require('../User');
+var User = require('../User'),
+    Classes = require('../Classes');
 
 /**
  * Monitor
@@ -27,8 +28,16 @@ function Monitor(option){
 
     User.call(this,option);
 
+    //this class 's teacher 's sessionId
     this.teacher = null;
+
+    //this class 's student 's sessionId
     this.student = null;
+
+    var thisClass = Classes[option.classid];
+
+    if(thisClass['teacher']) this.teacher = thisClass['teacher'].sessionId;
+    if(thisClass['student']) this.student = thisClass['student'].sessionId;
 
 }
 

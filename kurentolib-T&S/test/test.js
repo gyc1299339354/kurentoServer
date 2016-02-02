@@ -29,9 +29,11 @@ Monitor_option['sessionId'] = 'test_Monitor_seesionId',
 /**
  * create a
  */
-//var test_student = new Student(Student_option),
-//    test_teacher = new Teacher(Teacher_option),
-//    test_monitor = new Monitor(Monitor_option),
-//    test_monitor_help = new MonitorHelper(MonitorHelper_option);
+var test_student = new Student(Student_option),
+    test_teacher = new Teacher(Teacher_option),
+    test_monitor = new Monitor(Monitor_option),
+    test_monitor_help = new MonitorHelper(MonitorHelper_option);
 
 //console.log(KurentoUtil.test());
+//console.log(Classes);
+console.log(test_student.emit('test'));
