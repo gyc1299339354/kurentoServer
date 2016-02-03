@@ -85,7 +85,8 @@ wss.on('connection', function (ws) {
     ws.on('message', function (_message) {
         var message = JSON.parse(_message);
 
-        switch (message.id){
+
+        switch (message.id) {
             case 'aUserLogin':
                 var _option = message.option || {};
                 _option['sessionId'] = sessionId;
@@ -94,7 +95,7 @@ wss.on('connection', function (ws) {
                 break;
 
             case 'eventCome':
-                if(aUser) aUser.emit(message.evName,message.option);
+                if (aUser) aUser.emit(message.evName, message.option);
                 break;
 
             default:

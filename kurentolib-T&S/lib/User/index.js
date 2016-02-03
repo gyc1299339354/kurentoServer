@@ -16,12 +16,12 @@ var config = require('../../config'),
  */
 function User(option) {
 
-    if(!Classes[option.classid]){
+    if (!Classes[option.classid]) {
         createClass(option.classid);
     }
 
-    if(option.sessionId){
-        if(Users[option.sessionId]) return Users[option.sessionId];
+    if (option.sessionId) {
+        if (Users[option.sessionId]) return Users[option.sessionId];
     }
 
     //like word means
@@ -39,12 +39,6 @@ function User(option) {
     // user's Kurento WebRtcEndpoint
     this.webrtcendpont = null;
 
-    //the guy present video 's rtpendpoint
-    this.callerrtpendpoint = null;
-
-    //this guy 's rtpendpoint
-    this.calleertpendpoint = null;
-
     // user's Kurento PipeLine
     this.pipeline = null;
 
@@ -52,18 +46,18 @@ function User(option) {
     this.classid = option.classid || '_default';
 
     //user's WebSocket
-    this.ws = option.ws;
+    this.ws = option.ws || null;
 
     var thisClass = Classes[option.classid];
 
-    switch (option.role){
+    switch (option.role) {
         case 'teacher':
             thisClass['teacher'] = this;
-            if(thisClass['student']) this.view = thisClass['student'].sessionId;
+            if (thisClass['student']) this.view = thisClass['student'].sessionId;
             break;
         case 'student':
             thisClass['student'] = this;
-            if(thisClass['teacher']) this.view = thisClass['teacher'].sessionId;
+            if (thisClass['teacher']) this.view = thisClass['teacher'].sessionId;
             break;
         case 'monitor':
             thisClass['monitors']['monitor'][option.sessionId] = this;
@@ -78,17 +72,13 @@ function User(option) {
 }
 
 
-function createClass(classid){
+function createClass(classid) {
     Classes[classid] = {};
     Classes[classid]['teacher'] = null;
     Classes[classid]['student'] = null;
     Classes[classid]['monitors'] = {
-        monitor:{
-
-        },
-        monitorhelper:{
-
-        }
+        monitor: {},
+        monitorhelper: {}
     };
 }
 

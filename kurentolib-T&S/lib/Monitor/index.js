@@ -9,35 +9,44 @@ var User = require('../User'),
  * @param option
  * @constructor
  */
-function Monitor(option){
+function Monitor(option) {
 
     //判断option
-    if(!option){
+    if (!option) {
         return new Error('need param "option" !')
     }
 
-    if(!option.sessionId){
+    if (!option.sessionId) {
         return new Error('option need param "sessionId" !')
     }
 
-    if(!option.classid){
+    if (!option.classid) {
         return new Error('option need param "classid" !')
     }
 
     option['role'] = option.role || 'monitor';
 
-    User.call(this,option);
+    User.call(this, option);
 
-    //this class 's teacher 's sessionId
+    //this class 's teacher [Teacher]
     this.teacher = null;
 
-    //this class 's student 's sessionId
+    //this class 's student [Student]
     this.student = null;
 
     var thisClass = Classes[option.classid];
 
-    if(thisClass['teacher']) this.teacher = thisClass['teacher'].sessionId;
-    if(thisClass['student']) this.student = thisClass['student'].sessionId;
+    if (thisClass['teacher']) this.teacher = thisClass['teacher'];
+    if (thisClass['student']) this.student = thisClass['student'];
+
+    this.s_viewwebrtcendpoint = null;
+
+    this.t_viewwebrtcendpoint = null;
+
+    this.rtcendpoints = {
+        teacher: {},
+        student: {}
+    };
 
 }
 

@@ -32,6 +32,9 @@ function MonitorHelper(option){
 
     Monitor.call(this,option);
 
+    //the guy 's rtpendpoint to send out if in diff server node
+    this.outrtpendpoint = null;
+
 }
 
 module.exports = MonitorHelper;
