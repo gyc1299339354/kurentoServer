@@ -38,12 +38,6 @@ var options =
 var app = express();
 
 /*
- * Definition of global variables.
- */
-var idCounter = 0;
-
-
-/*
  * Server startup
  */
 var asUrl = url.parse(argv.as_uri);
@@ -57,11 +51,6 @@ var wss = new ws.Server({
     server: server,
     path: '/m2m'
 });
-
-function nextUniqueId() {
-    idCounter++;
-    return idCounter.toString();
-}
 
 /*
  * Management of WebSocket messages

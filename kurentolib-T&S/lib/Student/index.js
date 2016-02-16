@@ -32,7 +32,7 @@ function Student(option) {
     this.recordrtpendpoint = null;
 
     //the guy 's rtpendpoint to send out if in diff server node
-    this.outrtpendpoint = null;
+    this.outrtpendpoint = {};
 
     //this guy 's rtpendpoint to receive teacher if in diff server node
     this.recvrtpendpoint = null;

@@ -6,24 +6,22 @@ var Monitor = require('./lib/Monitor'),
 function aUserLogin(option) {
 
     if (arguments.length !== 1) {
-        console.warn('need a param : option!');
-        return undefined;
+        return console.warn('need a param : option!');
     }
 
     if (typeof option !== 'object') {
-        console.warn('error param : option is not object!');
-        return undefined;
+        return console.warn('error param : option is not object!');
     }
 
     if (!option.classid || !option.sessionId || !option.role || !option.ws) {
-        console.warn('error param : option { classid / sessionId / role } !');
-        return undefined;
+        return console.warn('error param : option { classid / sessionId / role } !');
     }
 
     var userOption = {
         classid: option.classid,
         sessionId: option.sessionId,
-        ws: option.ws
+        ws: option.ws,
+        wsuri: option.wsuri || null
     };
 
     switch (option.role) {

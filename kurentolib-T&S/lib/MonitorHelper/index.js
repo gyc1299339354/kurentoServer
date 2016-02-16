@@ -9,18 +9,18 @@ var Monitor = require('../Monitor'),
  * @param option
  * @constructor
  */
-function MonitorHelper(option){
+function MonitorHelper(option) {
 
     //判断option
-    if(!option){
+    if (!option) {
         return new Error('need param "option" !')
     }
 
-    if(!option.sessionId){
+    if (!option.sessionId) {
         return new Error('option need param "sessionId" !')
     }
 
-    if(!option.classid){
+    if (!option.classid) {
         return new Error('option need param "classid" !')
     }
 
@@ -30,10 +30,13 @@ function MonitorHelper(option){
     //助教监听，从student处取 wsuri
     option['wsuri'] = Classes[option.classid].student.wsuri;
 
-    Monitor.call(this,option);
+    Monitor.call(this, option);
 
     //the guy 's rtpendpoint to send out if in diff server node
-    this.outrtpendpoint = null;
+    this.outrtpendpoint = {};
+
+    //this guy 's rtpendpoint to receive teacher if in diff server node
+    this.recvrtpendpoint = null;
 
 }
 

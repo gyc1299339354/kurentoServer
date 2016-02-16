@@ -4,6 +4,7 @@
 
 var EventEmitter = require('events').EventEmitter,
     KurentoUtil = require('../KurentoUtil'),
+    kurento = require('kurento-client'),
     Users = require('../Users'),
     Classes = require('../Classes');
 
@@ -23,7 +24,7 @@ function EventUtil() {
      * on candidate coming
      * @param option {candidate}
      */
-    this.on('onCandidate', function (option) {
+    this.on('onIceCandidate', function (option) {
         var sessionId = this.sessionId || null,
             role = this.role || null,
             candidate = option.candidate || null;
@@ -42,7 +43,7 @@ function EventUtil() {
             candidate = option.candidate || null,
             who = option.who;
 
-        if (sessionId && role && candidate) KurentoUtil.addToIceCandidateQueueByRole(role, sessionId, candidate, who);
+        if (sessionId && role && candidate) KurentoUtil.addToIceCandidateQueueByRoleForView(role, sessionId, candidate, who);
 
     });
 
@@ -57,10 +58,9 @@ function EventUtil() {
             sessionId = this.sessionId,
             wsuri = this.wsuri,
             sdpOffer = option.sdpOffer,
-            aUser = Users[sessionId],
-            role = aUser.role,
-            wsuri = aUser.wsuri,
-            aClass = Classes[aUser.classid];
+            role = this.role,
+            wsuri = this.wsuri,
+            aClass = Classes[this.classid];
 
         //TODO clear the candidate queue
         //TODO create a kurento client
@@ -84,17 +84,17 @@ function EventUtil() {
 
             if (_pipeline) {
 
-                aUser.pipeline = _pipeline;
-                KurentoUtil.createKurentoWebRtcEndpoint(pipeline, function (error, webRtcEndpoint) {
+                this.pipeline = _pipeline;
+                KurentoUtil.createKurentoWebRtcEndpoint(_pipeline, function (error, webRtcEndpoint) {
                     if (error) return wsSend(ws, {evName: 'presentError', error: error});
 
-                    aUser.webrtcendpont = webRtcEndpoint;
+                    this.webrtcendpont = webRtcEndpoint;
 
-                    KurentoUtil.webRtcEndpointAddIceCandidate(aUser);
+                    KurentoUtil.webRtcEndpointAddIceCandidate(this);
 
                     webRtcEndpoint.on('OnIceCandidate', function (event) {
                         var candidate = kurento.register.complexTypes.IceCandidate(event.candidate);
-                        wsSend(ws, {evName: 'iceCandidate', candidate: candidate});
+                        wsSend(ws, {evName: 'presentIceCandidate', candidate: candidate});
                     });
 
                     KurentoUtil.endPointProcessOffer(webRtcEndpoint, sdpOffer, function (error, sdpAnswer) {
@@ -108,22 +108,29 @@ function EventUtil() {
                         });
                     });
                 });
+
+                //create recv RtcEndpoint
+                KurentoUtil.createKurentoRtcEndpoint(_pipeline, function (error, recvrtpendpoint) {
+                    if (error) return wsSend(ws, {evName: 'presentError', error: error});
+
+                    this.recvrtpendpoint = recvrtpendpoint;
+                });
             } else {
                 KurentoUtil.createKurentoPipeline(kurentoClient, function (error, pipeline) {
                     if (error) return wsSend(ws, {evName: 'presentError', error: error});
 
                     //copy above codes
-                    aUser.pipeline = _pipeline;
+                    this.pipeline = pipeline;
                     KurentoUtil.createKurentoWebRtcEndpoint(pipeline, function (error, webRtcEndpoint) {
                         if (error) return wsSend(ws, {evName: 'presentError', error: error});
 
-                        aUser.webrtcendpont = webRtcEndpoint;
+                        this.webrtcendpont = webRtcEndpoint;
 
-                        KurentoUtil.webRtcEndpointAddIceCandidate(aUser);
+                        KurentoUtil.webRtcEndpointAddIceCandidate(this);
 
                         webRtcEndpoint.on('OnIceCandidate', function (event) {
                             var candidate = kurento.register.complexTypes.IceCandidate(event.candidate);
-                            wsSend(ws, {evName: 'iceCandidate', candidate: candidate});
+                            wsSend(ws, {evName: 'presentIceCandidate', candidate: candidate});
                         });
 
                         KurentoUtil.endPointProcessOffer(webRtcEndpoint, sdpOffer, function (error, sdpAnswer) {
@@ -136,6 +143,11 @@ function EventUtil() {
                                 return;
                             });
                         });
+                    });
+                    KurentoUtil.createKurentoRtcEndpoint(pipeline, function (error, recvrtpendpoint) {
+                        if (error) return wsSend(ws, {evName: 'presentError', error: error});
+
+                        this.recvrtpendpoint = recvrtpendpoint;
                     });
                 });
             }
@@ -150,10 +162,15 @@ function EventUtil() {
         var sessionId = this.sessionId,
             ws = this.ws,
             wsuri = this.wsuri,
+            sdpoffer = option.sdpOffer,
             role = this.role,
             aClass = Classes[this.classid],
-            who = null;
+            pipeline = this.pipeline,
+            who = null,
+            callerWebRtcEndPoint = null;
         if (option && option.who) who = Users[option.who];
+        if (option && !option.who) (role === 'teacher') ? who = aClass.student : who = aClass.teacher;
+        callerWebRtcEndPoint = who.webrtcendpont;
 
         //judge node
         var isSameNode = false;
@@ -161,15 +178,91 @@ function EventUtil() {
             isSameNode = true;
         }
 
-        if (isSameNode) {
+        //TODO  clear candidate
+        KurentoUtil.clearIceCandidateByRoleForView(role, sessionId, who.role);
 
-        } else {
+        //TODO  create a webRtcEndpoint
+        //TODO  add ice candidate
+        KurentoUtil.createKurentoWebRtcEndpoint(pipeline, function (error, viewWebRtcEndpoint) {
+            if (error) return wsSend(ws, {evName: 'viewError', error: error});
 
-        }
+            if (who && who.role === 'teacher') {
+                this.t_viewwebrtcendpoint = viewWebRtcEndpoint;
+            } else if (who && who.role === 'student') {
+                this.s_viewwebrtcendpoint = viewWebRtcEndpoint;
+            } else {
+                this.viewwebrtcendpoint = viewWebRtcEndpoint;
+            }
 
+            KurentoUtil.webRtcEndpointAddIceCandidateForView(this, who.role);
 
+            viewWebRtcEndpoint.on('OnIceCandidate', function (event) {
+                var candidate = kurento.register.complexTypes.IceCandidate(event.candidate);
+                wsSend(ws, {evName: 'viewIceCandidate', candidate: candidate, who: who.id});
+            });
+
+            KurentoUtil.endPointProcessOffer(viewWebRtcEndpoint, sdpoffer, function (error, sdpAnswer) {
+                if (error) return wsSend(ws, {evName: 'viewError', error: error});
+
+                wsSend(ws, {evName: 'viewSdpAnswer', sdpAnswer: sdpAnswer, caller: who.id});
+
+                if (isSameNode) {
+                    //TODO  connect two
+                    //TODO  send the sdpAnswer
+                    callerWebRtcEndPoint.connect(viewWebRtcEndpoint, function (error) {
+                        if (error) return wsSend(ws, {evName: 'viewError', error: error});
+
+                        viewWebRtcEndpoint.gatherCandidates(function (error) {
+                            if (error) return wsSend(ws, {evName: 'viewError', error: error});
+                        });
+                    });
+                } else {
+                    //TODO caller create the out rtcendpoint
+                    var caller_pipeline = who.pipeline,
+                        caller_outrtpendpoint = who.outrtpendpoint,
+                        recvrtpendpoint = this.recvrtpendpoint;
+
+                    KurentoUtil.createKurentoRtcEndpoint(caller_outrtpendpoint, function (error, _outrtpendpoint) {
+                        if (error) return wsSend(ws, {evName: 'viewError', error: error});
+
+                        caller_outrtpendpoint[sessionId] = _outrtpendpoint;
+
+                        KurentoUtil.connectEndpoints(callerWebRtcEndPoint, caller_outrtpendpoint, function (error) {
+                            if (error) return wsSend(ws, {evName: 'viewError', error: error});
+
+                            KurentoUtil.endPointGenerateOffer(_outrtpendpoint, function (error, callerSdpOffer) {
+                                if (error) return wsSend(ws, {evName: 'viewError', error: error});
+
+                                KurentoUtil.endPointProcessOffer(recvrtpendpoint, callerSdpOffer, function (error, calleeSdpAnswer) {
+                                    if (error) return wsSend(ws, {evName: 'viewError', error: error});
+
+                                    KurentoUtil.endpointPrecessAnswer(_outrtpendpoint, calleeSdpAnswer, function (error) {
+                                        if (error) return wsSend(ws, {evName: 'viewError', error: error});
+
+                                        KurentoUtil.connectEndpoints(recvrtpendpoint, viewWebRtcEndpoint, function (error) {
+                                            if (error) return wsSend(ws, {evName: 'viewError', error: error});
+
+                                            viewWebRtcEndpoint.gatherCandidates(function (error) {
+                                                if (error) return wsSend(ws, {evName: 'viewError', error: error});
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                }
+            });
+        });
     });
 
+    /**
+     *
+     * @param option
+     */
+    this.on('stop', function (option) {
+        //TODO
+    });
 }
 
 EventUtil.prototype = new EventEmitter();

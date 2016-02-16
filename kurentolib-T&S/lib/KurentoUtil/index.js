@@ -37,17 +37,17 @@ module.exports = {
         if (typeof _callback !== 'function') return console.warn('param callback: callback is not a function');
 
         if (KurentoClients[_wsuri]) {
-            return callback(null, KurentoClients[_wsuri]);
+            return _callback(null, KurentoClients[_wsuri]);
         }
 
         kurento(_wsuri, function (error, kurentoClient) {
             if (error) {
                 console.warn("Could not find media server at address " + argv.ws_uri);
-                return callback("Could not find media server at address" + argv.ws_uri + ". Exiting with error " + error);
+                return _callback("Could not find media server at address" + argv.ws_uri + ". Exiting with error " + error);
             }
 
             KurentoClients[_wsuri] = kurentoClient;
-            return callback(null, kurentoClient);
+            return _callback(null, kurentoClient);
         });
 
     },
@@ -131,7 +131,7 @@ module.exports = {
 
         endpoint.processOffer(sdpOffer, function (error, sdpAnswer) {
             if (error) return callback(error);
-            return callback(null);
+            return callback(null, sdpAnswer);
         });
     },
 
@@ -188,7 +188,6 @@ module.exports = {
             }
         }
 
-        return;
     },
 
     /**
@@ -204,8 +203,10 @@ module.exports = {
             sessionId = aUser.sessionId,
             candicateList = [];
 
-        if (who) {
-            webRtcEndpointView = (who === 'teacher') ? aUser.t_viewwebrtcendpoint : aUser.s_viewwebrtcendpoint;
+        if (who === 'teacher') {
+            webRtcEndpointView = aUser.t_viewwebrtcendpoint;
+        } else if (who === 'student') {
+            webRtcEndpointView = aUser.s_viewwebrtcendpoint;
         } else {
             webRtcEndpointView = aUser.viewwebrtcendpoint;
         }
@@ -271,7 +272,7 @@ module.exports = {
 
         var candidate = kurento.register.complexTypes.IceCandidate(_candidate);
 
-        if (Users[sessionId].webrtcendpont) {
+        if (Users[sessionId] && Users[sessionId].webrtcendpont) {
             Users[sessionId].webrtcendpont.addIceCandidate(candidate);
         } else {
 
@@ -430,21 +431,20 @@ module.exports = {
     },
 
     /**
-     * connect two cendpoints in same node
+     * connect two endpoints
      * @param caller
      * @param callee
      * @param callback
      */
-    connectEndpointsSameNode: function (callerWebRtcEndpoint, calleeWebRtcEndpoint, callback) {
+    connectEndpoints: function (callerEndpoint, calleeEndpoint, callback) {
         if (arguments.length !== 3) return console.warn('need 3 params : callerWebRtcEndpoint & calleeWebRtcEndpoint & callback');
 
         if (typeof callback !== 'function') return console.warn('param callback: callback is not a function');
 
-        callerWebRtcEndpoint.connect(calleeWebRtcEndpoint, function (error) {
+        callerEndpoint.connect(callerEndpoint, function (error) {
             if (error) return callback(error);
             return callback(null);
         });
-
     },
 
     /**
@@ -453,8 +453,8 @@ module.exports = {
      * @param calleeSessionId
      * @param callback
      */
-    connectEndpointsDiffNode: function (callerSessionId, calleeSessionId, callback) {
-
-    }
+    //connectEndpointsDiffNode: function (callerSessionId, calleeSessionId, callback) {
+    //
+    //}
 
 };
