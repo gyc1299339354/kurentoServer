@@ -2,7 +2,10 @@
  * Created by Administrator on 2016/1/29.
  */
 var Monitor = require('../Monitor'),
-    Classes = require('../Classes');
+    Classes = require('../Classes'),
+    util = require('util'),
+    EventEmitter = require('events').EventEmitter
+EventUtil = require('../EventUtil');
 
 /**
  * MonitorHelper
@@ -38,6 +41,9 @@ function MonitorHelper(option) {
     //this guy 's rtpendpoint to receive teacher if in diff server node
     this.recvrtpendpoint = null;
 
+    EventUtil(this);
 }
+
+util.inherits(MonitorHelper, EventEmitter);
 
 module.exports = MonitorHelper;

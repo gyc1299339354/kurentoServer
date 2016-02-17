@@ -282,11 +282,11 @@ module.exports = {
                     studentCandidatesQueue[sessionId].push(candidate);
                     break;
                 case 'teacher':
-                    if (teacherCandidatesQueue[sessionId]) teacherCandidatesQueue[sessionId] = [];
+                    if (!teacherCandidatesQueue[sessionId]) teacherCandidatesQueue[sessionId] = [];
                     teacherCandidatesQueue[sessionId].push(candidate);
                     break;
                 case 'monitorhelper':
-                    if (monitorhelperCandidateQueue[sessionId]) monitorhelperCandidateQueue[sessionId] = [];
+                    if (!monitorhelperCandidateQueue[sessionId]) monitorhelperCandidateQueue[sessionId] = [];
                     monitorhelperCandidateQueue[sessionId].push(candidate);
                     break;
                 default :
@@ -330,24 +330,24 @@ module.exports = {
                     studentViewCandidatesQueue[sessionId].push(candidate);
                     break;
                 case 'teacher':
-                    if (teacherViewCandidatesQueue[sessionId]) teacherViewCandidatesQueue[sessionId] = [];
+                    if (!teacherViewCandidatesQueue[sessionId]) teacherViewCandidatesQueue[sessionId] = [];
                     teacherViewCandidatesQueue[sessionId].push(candidate);
                     break;
                 case 'monitor':
                     if (who === 'teacher') {
-                        if (monitorTeaViewCandidatesQueue[sessionId])monitorTeaViewCandidatesQueue[sessionId] = [];
+                        if (!monitorTeaViewCandidatesQueue[sessionId])monitorTeaViewCandidatesQueue[sessionId] = [];
                         monitorTeaViewCandidatesQueue[sessionId].push(candidate);
                     } else {
-                        if (monitorStuViewCandidatesQueue[sessionId])monitorStuViewCandidatesQueue[sessionId] = [];
+                        if (!monitorStuViewCandidatesQueue[sessionId])monitorStuViewCandidatesQueue[sessionId] = [];
                         monitorStuViewCandidatesQueue[sessionId].push(candidate);
                     }
                     break;
                 case 'monitorhelper':
                     if (who === 'teacher') {
-                        if (monitorhelperTeaViewCandidatesQueue[sessionId])monitorhelperTeaViewCandidatesQueue[sessionId] = [];
+                        if (!monitorhelperTeaViewCandidatesQueue[sessionId])monitorhelperTeaViewCandidatesQueue[sessionId] = [];
                         monitorhelperTeaViewCandidatesQueue[sessionId].push(candidate);
                     } else {
-                        if (monitorhelperStuViewCandidatesQueue[sessionId])monitorhelperStuViewCandidatesQueue[sessionId] = [];
+                        if (!monitorhelperStuViewCandidatesQueue[sessionId])monitorhelperStuViewCandidatesQueue[sessionId] = [];
                         monitorhelperStuViewCandidatesQueue[sessionId].push(candidate);
                     }
                     break;
@@ -448,13 +448,26 @@ module.exports = {
     },
 
     /**
-     * connect two cendpoints with different nodes
-     * @param callerSessionId
-     * @param calleeSessionId
-     * @param callback
+     *
+     * @param aClass
+     * @param msg
      */
-    //connectEndpointsDiffNode: function (callerSessionId, calleeSessionId, callback) {
-    //
-    //}
-
+    notifyInClass: function (aClass, msg, except) {
+        //loop users in class
+        var _msg = JSON.stringify(msg);
+        if (aClass && aClass.student && aClass.student.ws && except !== 'student') aClass.student.ws.send(_msg);
+        if (aClass && aClass.teacher && aClass.teacher.ws && except !== 'teacher') aClass.teacher.ws.send(_msg);
+        if (aClass && aClass.monitor) {
+            var monitors = aClass.monitor;
+            for (var keyname in monitors) {
+                if (monitors[keyname] && monitors[keyname].ws)  monitors[keyname].ws.send(_msg);
+            }
+        }
+        if (aClass && aClass.monitorhelper) {
+            var monitorhelpers = aClass.monitorhelper;
+            for (var keyname in monitorhelpers) {
+                if (monitorhelpers[keyname] && monitorhelpers[keyname].ws)  monitorhelpers[keyname].ws.send(_msg);
+            }
+        }
+    }
 };

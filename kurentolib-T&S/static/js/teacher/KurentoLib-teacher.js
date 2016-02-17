@@ -32,7 +32,7 @@ var KurentoLib = {
         };
 
         localWebRtc = kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options, function (error) {
-            if (error) return onError(error);
+            if (error) return console.warn(error);
 
             this.generateOffer(function (error, offerSdp) {
                 if (error) return console.warn('error: ', error);
@@ -70,18 +70,17 @@ var KurentoLib = {
         };
 
         remoteWebRtc = kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options, function (error) {
-            if (error) return onError(error);
+            if (error) return console.warn(error);
 
             this.generateOffer(function (error, sdpOffer) {
                 sendMessage({
                     evName: 'view',
                     option: {
-                        candidate: sdpOffer,
+                        sdpOffer: sdpOffer,
                     }
                 });
             });
         });
-
     },
     /**
      *  服务器返回错误

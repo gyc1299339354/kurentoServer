@@ -3,16 +3,11 @@
  */
 
 var Classes = {
-    _default:{
-        teacher:{
-
-        },
-        student:{
-
-        },
-        monitors:{
-
-        }
+    _default: {
+        teacher: {},
+        student: {},
+        monitor: {},
+        monitorhelper: {}
     }
 };
 

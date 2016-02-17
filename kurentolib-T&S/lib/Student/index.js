@@ -1,9 +1,11 @@
+
 /**
  * Created by Administrator on 2016/1/29.
  */
 var User = require('../User'),
-    EventUtil = require('../EventUtil');
-
+    EventUtil = require('../EventUtil'),
+    util = require('util'),
+    EventEmitter = require('events').EventEmitter;
 /**
  * Student
  * @param option
@@ -40,8 +42,9 @@ function Student(option) {
     //a webrtcendpoint to view teacher
     this.viewwebrtcendpoint = null;
 
+    EventUtil(this);
 }
 
-Student.prototype = new EventUtil();
+util.inherits(Student, EventEmitter);
 
 module.exports = Student;

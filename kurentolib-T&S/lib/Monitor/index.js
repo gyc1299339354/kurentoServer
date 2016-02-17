@@ -2,7 +2,10 @@
  * Created by Administrator on 2016/1/29.
  */
 var User = require('../User'),
-    Classes = require('../Classes');
+    Classes = require('../Classes'),
+    EventUtil = require('../EventUtil'),
+    util = require('util'),
+    EventEmitter = require('events').EventEmitter;
 
 /**
  * Monitor
@@ -48,6 +51,9 @@ function Monitor(option) {
         student: {}
     };
 
+    EventUtil(this);
 }
+
+util.inherits(Monitor, EventEmitter);
 
 module.exports = Monitor;

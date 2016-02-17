@@ -1,7 +1,10 @@
 /**
  * Created by Administrator on 2016/1/29.
  */
-var User = require('../User');
+var User = require('../User'),
+    util = require('util'),
+    EventUtil = require('../EventUtil'),
+    EventEmitter = require('events').EventEmitter;
 
 /**
  * Teacher
@@ -39,6 +42,9 @@ function Teacher(option) {
     //a webrtcendpoint to view student
     this.viewwebrtcendpoint = null;
 
+    EventUtil(this);
 }
+
+util.inherits(Teacher, EventEmitter);
 
 module.exports = Teacher;

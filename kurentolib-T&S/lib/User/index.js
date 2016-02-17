@@ -53,17 +53,17 @@ function User(option) {
     switch (option.role) {
         case 'teacher':
             thisClass['teacher'] = this;
-            if (thisClass['student']) this.view = thisClass['student'].sessionId;
+            if (thisClass['student'] && thisClass['student'].sessionId) this.view = thisClass['student'].sessionId;
             break;
         case 'student':
             thisClass['student'] = this;
-            if (thisClass['teacher']) this.view = thisClass['teacher'].sessionId;
+            if (thisClass['teacher'] && thisClass['teacher'].sessionId) this.view = thisClass['teacher'].sessionId;
             break;
         case 'monitor':
-            thisClass['monitors']['monitor'][option.sessionId] = this;
+            thisClass['monitor'][option.sessionId] = this;
             break;
         case 'monitorhelper':
-            thisClass['monitors']['monitorhelper'][option.sessionId] = this;
+            thisClass['monitorhelper'][option.sessionId] = this;
             break;
         default:
             break;
@@ -76,10 +76,8 @@ function createClass(classid) {
     Classes[classid] = {};
     Classes[classid]['teacher'] = null;
     Classes[classid]['student'] = null;
-    Classes[classid]['monitors'] = {
-        monitor: {},
-        monitorhelper: {}
-    };
+    Classes[classid]['monitor'] = {};
+    Classes[classid]['monitorhelper'] = {};
 }
 
 module.exports = User;
