@@ -1,7 +1,8 @@
 var Monitor = require('./lib/Monitor'),
     MonitorHelper = require('./lib/MonitorHelper'),
     Student = require('./lib/Student'),
-    Teacher = require('./lib/Teacher');
+    Teacher = require('./lib/Teacher'),
+    Classes = require('./lib/Classes');
 
 function aUserLogin(option) {
 
@@ -46,7 +47,30 @@ function aUserLogin(option) {
             break;
     }
 
+}
+
+function stop(aUser) {
+    var aClass = Classes[aUser.classid];
+
+    //销毁收视者们的endpoint
+    if (aUser.role === 'student' || aUser.role === 'teacher') {
+        if (aUser.role === 'student' && !!aClass.teacher && aClass.teacher.viewwebrtcendpoint) {
+
+        }
+        if (aUser.role === 'teacher' && !!aClass.student && aClass.student.viewwebrtcendpoint) {
+
+        }
+    } else {
+
+
+    }
+
+    //销毁user
+    if (aUser.webrtcendpont) {
+        aUser.webrtcendpont.release();
+    }
 
 }
 
 module.exports.aUserLogin = aUserLogin;
+module.exports.stop = stop;

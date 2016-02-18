@@ -141,7 +141,7 @@ module.exports = {
      * @param sdpAnswer
      * @param callback
      */
-    endpointPrecessAnswer: function (endpoint, sdpAnswer, callback) {
+    endpointProcessAnswer: function (endpoint, sdpAnswer, callback) {
         if (arguments.length !== 3) return console.warn('need at least 3 param : endpoint & sdpAnswer & callback');
 
         if (typeof callback !== 'function') return console.warn('param callback: callback is not a function');
@@ -441,7 +441,7 @@ module.exports = {
 
         if (typeof callback !== 'function') return console.warn('param callback: callback is not a function');
 
-        callerEndpoint.connect(callerEndpoint, function (error) {
+        callerEndpoint.connect(calleeEndpoint, function (error) {
             if (error) return callback(error);
             return callback(null);
         });

@@ -31,8 +31,8 @@ var argv = minimist(process.argv.slice(2), {
 
 var options =
 {
-    key: fs.readFileSync('keys/server.key'),
-    cert: fs.readFileSync('keys/server.crt')
+    key: fs.readFileSync('keys/2_rtcs.dadaabc.com.key'),
+    cert: fs.readFileSync('keys/1_rtcs.dadaabc.com_bundle.crt')
 };
 
 var app = express();
@@ -87,6 +87,9 @@ wss.on('connection', function (ws) {
                 if (aUser) aUser.emit(message.evName, message.option);
                 break;
 
+            case 'stop':
+                if (aUser) index.stop(aUser);
+                break;
             default:
                 break;
         }

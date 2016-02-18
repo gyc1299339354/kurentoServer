@@ -3,13 +3,6 @@
  */
 var _localvideo, _remotevideo, localWebRtc, remoteWebRtc;
 var KurentoLib = {
-    test: function () {
-        console.log('test');
-        this.test1();
-    },
-    test1: function () {
-        console.log('test1');
-    },
     /**
      *  发布本地视频
      * @param option
@@ -17,7 +10,7 @@ var KurentoLib = {
     startPresent: function (option) {
         if (!option || !option.localVideo) return console.warn('error: need option or option.localvideo');
 
-        _localvideo = option.localVideo;
+        if (!_remotevideo) _localvideo = option.localVideo;
 
         var options = {
             localVideo: _localvideo,
@@ -53,7 +46,7 @@ var KurentoLib = {
     startView: function (option) {
         if (!option || !option.remoteVideo) return console.warn('error: need option or option.remoteVideo');
 
-        _remotevideo = option.remoteVideo;
+        if (!_remotevideo) _remotevideo = option.remoteVideo;
         var who = option.who;
 
         var options = {
@@ -133,7 +126,14 @@ var KurentoLib = {
      * @param msg
      */
     leaving: function (msg) {
-
+        if (remoteWebRtc) {
+            remoteWebRtc.dispose();
+            remoteWebRtc = null;
+        }
+        if (_remotevideo) {
+            _remotevideo.src = '';
+            _remotevideo.style.background = '';
+        }
     }
 
 };

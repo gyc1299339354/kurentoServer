@@ -138,7 +138,24 @@ function EventUtil(aUser) {
                             if (error) return wsSend(ws, {evName: 'presentError', error: error});
 
                             wsSend(ws, {evName: 'presentSdpAnswer', sdpAnswer: sdpAnswer});
+                            //通知其他人
                             KurentoUtil.notifyInClass(aClass, {evName: 'coming', who: sessionId}, role);
+                            //通知自己 接收另一位已发布视频
+                            switch (role) {
+                                case 'student':
+                                    if (aClass && aClass.teacher && aClass.teacher.sessionId)
+                                        wsSend(ws, {evName: 'coming', who: aClass.teacher.sessionId});
+                                    break;
+                                case 'teacher':
+                                    if (aClass && aClass.student && aClass.student.sessionId)
+                                        wsSend(ws, {evName: 'coming', who: aClass.student.sessionId});
+                                    break;
+                                case 'monitorhelper':
+                                    break;
+                                default :
+                                    break;
+                            }
+
 
                             KurentoUtil.webRtcEndpointGatherCandidates(webRtcEndpoint, function (error) {
                                 if (error) return console.warn('webRtcEndpoint Gather Candidates', error);
@@ -219,13 +236,13 @@ function EventUtil(aUser) {
             KurentoUtil.endPointProcessOffer(viewWebRtcEndpoint, sdpoffer, function (error, sdpAnswer) {
                 if (error) return wsSend(ws, {evName: 'viewError', error: error});
 
-                wsSend(ws, {evName: 'viewSdpAnswer', sdpAnswer: sdpAnswer, caller: who.id});
-
                 if (isSameNode) {
                     //TODO  connect two
                     //TODO  send the sdpAnswer
-                    callerWebRtcEndPoint.connect(viewWebRtcEndpoint, function (error) {
+                    KurentoUtil.connectEndpoints(callerWebRtcEndPoint, viewWebRtcEndpoint, function (error) {
                         if (error) return wsSend(ws, {evName: 'viewError', error: error});
+
+                        wsSend(ws, {evName: 'viewSdpAnswer', sdpAnswer: sdpAnswer, caller: who.id});
 
                         viewWebRtcEndpoint.gatherCandidates(function (error) {
                             if (error) return wsSend(ws, {evName: 'viewError', error: error});
@@ -233,16 +250,20 @@ function EventUtil(aUser) {
                     });
                 } else {
                     //TODO caller create the out rtcendpoint
-                    var caller_pipeline = who.pipeline,
+
+                    var //对方的pipeline
+                        caller_pipeline = who.pipeline,
+                    //对方的 输出 rtpendpoint 们
                         caller_outrtpendpoint = who.outrtpendpoint,
+                    //自己的 输入 rtpendpoint
                         recvrtpendpoint = that.recvrtpendpoint;
 
-                    KurentoUtil.createKurentoRtcEndpoint(caller_outrtpendpoint, function (error, _outrtpendpoint) {
+                    KurentoUtil.createKurentoRtcEndpoint(caller_pipeline, function (error, _outrtpendpoint) {
                         if (error) return wsSend(ws, {evName: 'viewError', error: error});
 
                         caller_outrtpendpoint[sessionId] = _outrtpendpoint;
 
-                        KurentoUtil.connectEndpoints(callerWebRtcEndPoint, caller_outrtpendpoint, function (error) {
+                        KurentoUtil.connectEndpoints(callerWebRtcEndPoint, _outrtpendpoint, function (error) {
                             if (error) return wsSend(ws, {evName: 'viewError', error: error});
 
                             KurentoUtil.endPointGenerateOffer(_outrtpendpoint, function (error, callerSdpOffer) {
@@ -251,11 +272,13 @@ function EventUtil(aUser) {
                                 KurentoUtil.endPointProcessOffer(recvrtpendpoint, callerSdpOffer, function (error, calleeSdpAnswer) {
                                     if (error) return wsSend(ws, {evName: 'viewError', error: error});
 
-                                    KurentoUtil.endpointPrecessAnswer(_outrtpendpoint, calleeSdpAnswer, function (error) {
+                                    KurentoUtil.endpointProcessAnswer(_outrtpendpoint, calleeSdpAnswer, function (error) {
                                         if (error) return wsSend(ws, {evName: 'viewError', error: error});
 
                                         KurentoUtil.connectEndpoints(recvrtpendpoint, viewWebRtcEndpoint, function (error) {
                                             if (error) return wsSend(ws, {evName: 'viewError', error: error});
+
+                                            wsSend(ws, {evName: 'viewSdpAnswer', sdpAnswer: sdpAnswer, caller: who.id});
 
                                             viewWebRtcEndpoint.gatherCandidates(function (error) {
                                                 if (error) return wsSend(ws, {evName: 'viewError', error: error});

@@ -16,8 +16,8 @@ ws.onopen = function () {
         id: 'aUserLogin',
         option: {
             classid: '_default',
-            role: 'teacher',
-            wsuri: 'ws://121.43.108.40:8888/kurento'
+            role: 'teacher'
+            //wsuri: 'ws://121.43.108.40:8888/kurento'
         }
     }));
 };
