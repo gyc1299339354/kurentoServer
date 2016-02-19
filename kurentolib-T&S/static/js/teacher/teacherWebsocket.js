@@ -3,15 +3,23 @@
  */
 
 var ws = new WebSocket('wss://' + location.host + '/m2m');
+var WS_STATE = false;
 
 function sendMessage(message) {
-    if (!message.id) message.id = 'eventCome';
-    var jsonMessage = JSON.stringify(message);
-    //console.log('Sending message: ' + jsonMessage);
-    ws.send(jsonMessage);
+    if (!WS_STATE) {
+        setTimeout(function () {
+            sendMessage(message);
+        }, 500);
+    } else {
+        if (!message.id) message.id = 'eventCome';
+        var jsonMessage = JSON.stringify(message);
+        //console.log('Sending message: ' + jsonMessage);
+        ws.send(jsonMessage);
+    }
 }
 
 ws.onopen = function () {
+    WS_STATE = true;
     ws.send(JSON.stringify({
         id: 'aUserLogin',
         option: {

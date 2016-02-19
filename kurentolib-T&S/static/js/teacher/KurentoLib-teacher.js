@@ -115,11 +115,13 @@ var KurentoLib = {
      * @param msg
      */
     coming: function (msg) {
-        var who = msg.who;
-        this.startView({
-            who: who,
-            remoteVideo: document.getElementById('remotevideo')
-        });
+        var who = msg.who, startView = this.startView;
+        setTimeout(function () {
+            startView({
+                who: who,
+                remoteVideo: document.getElementById('remotevideo')
+            });
+        }, 2000);
     },
     /**
      *  用户离开

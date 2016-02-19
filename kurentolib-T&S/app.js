@@ -68,7 +68,7 @@ wss.on('connection', function (ws) {
 
     ws.on('close', function () {
         console.log('Connection ' + sessionId + ' closed');
-        //index.stop(sessionId);
+        index.stop(aUser);
     });
 
     ws.on('message', function (_message) {
